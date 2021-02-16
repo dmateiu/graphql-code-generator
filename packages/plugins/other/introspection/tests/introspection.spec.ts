@@ -36,7 +36,12 @@ describe('Introspection template', () => {
 
     const content = await plugin(schema, [], { minify: true }, { outputFile: '' });
     const introspection = JSON.stringify(
-      introspectionFromSchema(schema, { descriptions: true, schemaDescription: false, specifiedByUrl: false })
+      introspectionFromSchema(schema, {
+        descriptions: true,
+        schemaDescription: false,
+        specifiedByUrl: false,
+        inputValueDeprecation: false,
+      })
     );
     expect(introspection).toEqual(content);
   });
@@ -99,5 +104,30 @@ describe('Introspection template', () => {
     // type Query { _entities, _service }
     expect(queryType.fields.some(f => f.name === '_entities')).toBe(false);
     expect(queryType.fields.some(f => f.name === '_service')).toBe(false);
+  });
+
+  it('should support deprecated input arguments', async () => {
+    const schema = buildSchema(/* GraphQL */ `
+      type Query {
+        fieldTest: String @deprecated(reason: "some deprecation reason")
+      }
+
+      schema {
+        query: Query
+      }
+    `);
+
+    const content = await plugin(schema, [], { inputValueDeprecation: true }, { outputFile: '' });
+    const introspection = JSON.stringify(
+      introspectionFromSchema(schema, {
+        descriptions: true,
+        schemaDescription: false,
+        specifiedByUrl: false,
+        inputValueDeprecation: true,
+      }),
+      null,
+      2
+    );
+    expect(introspection).toEqual(content);
   });
 });

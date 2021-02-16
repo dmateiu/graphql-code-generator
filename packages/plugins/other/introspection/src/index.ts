@@ -49,6 +49,12 @@ export interface IntrospectionPluginConfig {
 
   // Internal
   federation?: boolean;
+
+  /**
+   * @description Whether target GraphQL server support deprecation of input values.
+   * @default false
+   */
+  inputValueDeprecation?: boolean;
 }
 
 export const plugin: PluginFunction<IntrospectionPluginConfig> = async (
@@ -61,12 +67,14 @@ export const plugin: PluginFunction<IntrospectionPluginConfig> = async (
   const directiveIsRepeatable = getConfigValue(pluginConfig.directiveIsRepeatable, true);
   const schemaDescription = getConfigValue(pluginConfig.schemaDescription, undefined);
   const specifiedByUrl = getConfigValue(pluginConfig.specifiedByUrl, undefined);
+  const inputValueDeprecation = getConfigValue(pluginConfig.inputValueDeprecation, undefined);
 
   const introspection = introspectionFromSchema(cleanSchema, {
     descriptions,
     directiveIsRepeatable,
     schemaDescription,
     specifiedByUrl,
+    inputValueDeprecation,
   });
 
   return pluginConfig.minify ? JSON.stringify(introspection) : JSON.stringify(introspection, null, 2);
